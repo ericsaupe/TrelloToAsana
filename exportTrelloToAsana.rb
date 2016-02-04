@@ -94,7 +94,23 @@ boards.each do |board|
         name: card.name,
         notes: card.desc,
         due_on: due_on,
-        assignee: assignee)
+        assignee: assignee
+      )
+
+      # Add tags
+      card.labels.each do |l|
+        current_tags = client.tags.find_all(workspace: workspace.id)
+        if !current_tags.map(&:name).include? l.name
+          # Create tag
+          tag = client.tags.create(workspace: workspace.id,
+            name: l.name
+          )
+        else
+          # Use tag
+          tag = current_tags.select{ |t| t.name.downcase == l.name.downcase }.first
+        end
+        task.add_tag(tag: tag.id)
+      end
 
       #Project
       task.add_project(project: project.id)
